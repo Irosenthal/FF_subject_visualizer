@@ -8,7 +8,6 @@ library(shiny)
 library(readr)
 library(dplyr)
 library(sf)
-library(stringr)
 
 #load data
 subjects_raw <- read_csv("data/floating-forests-subjects.csv")
@@ -21,7 +20,7 @@ subjects_clean <- subjects_raw %>%
 
 #Build the app!
 
-# Define UI for application that draws a histogram
+# Define UI 
 ui <- fluidPage(
     textInput("subject", label = "Enter a Subject id"),
     textOutput("zooniverse_subject_id"),
