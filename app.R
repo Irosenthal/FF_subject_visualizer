@@ -1,49 +1,47 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+#' Shiny app to display Floating Forests subjects and classifications
+#' @author Isaac Rosenthal
+#'
+#'
 
+#load libraries
 library(shiny)
+library(readr)
+library(dplyr)
+library(sf)
+library(stringr)
+
+#load data
+subjects_raw <- read_csv("data/floating-forests-subjects.csv")
+
+#clean up image URLs
+subjects_clean <- subjects_raw %>%
+  mutate(URL = gsub(pattern = "\\{\"0\":\"", replacement = "", x = locations)) %>%
+  mutate(URL = gsub(pattern = "\"\\}", replacement = "", x = URL))
+  
+
+#Build the app!
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
+    textInput("subject", label = "Enter a Subject id"),
+    textOutput("zooniverse_subject_id"),
+    textOutput("zooniverse_subject_URL"),
+    htmlOutput("zooniverse_subject_image")
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
+server <- function(input, output, session) {
+  output$zooniverse_subject_id <- renderText({
+    paste0("Zooniverse ID: ",  filter(subjects_clean, subject_id == input$subject)$subject_id)
+  })
+  output$zooniverse_subject_URL <- renderText({
+    paste0("Image URL: ",  filter(subjects_clean, subject_id == input$subject)$URL)
+  })
+  
+  output$zooniverse_subject_image <- renderUI({
+    
+    src <- filter(subjects_clean, subject_id == input$subject)$URL
+    tags$img(src=src, height = "75%", width = "75%")
+  })
+  
 }
-
-# Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
