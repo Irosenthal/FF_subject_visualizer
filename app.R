@@ -24,7 +24,7 @@ rasterize_relaunch_image <- function(arow){
   proj = paste0("+proj=utm +zone=", zone , " +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
   
   #rasterize  
-  img <-brick(basename(loc),              
+  img <-rasterize(basename(loc),              
               crs=proj)
   #add tile corners
   img@extent = extent(c(arow$`#tile_UL_x`, arow$`#tile_LR_x`, 
